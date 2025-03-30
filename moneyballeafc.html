@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.png">
+  <title>Moneyball - EAFC</title>
+  <style>
+    /* Paleta de colores:
+       - Fondo principal: #F5EEDC (Usado en background image)
+       - Primario: #27548A
+       - Secundario: #183B4E
+       - Destacado: #DDA853
+    */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('moneyballbackground.jpg') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background-color: rgba(255, 255, 255, 0.97); /* Slightly more opaque */
+      border: 2px solid #27548A;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(24, 59, 78, 0.2);
+      width: 95%;
+      max-width: 1100px;
+      padding: 20px 30px;
+      margin: 20px auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #27548A;
+      font-size: 2em;
+    }
+    .max-rating {
+      text-align: center;
+      font-size: 1.1em;
+      margin-bottom: 15px;
+      color: #DDA853;
+      font-weight: bold;
+    }
+    p {
+      text-align: center;
+      color: #183B4E;
+      font-size: 1em;
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    fieldset {
+      border: 1px solid #27548A;
+      border-radius: 6px;
+      padding: 10px 15px;
+      margin: 0;
+      background-color: rgba(255, 255, 255, 0.7); /* Slightly more transparent fieldset */
+    }
+    legend {
+      padding: 0 10px;
+      font-weight: bold;
+      color: #27548A;
+      font-size: 1.1em;
+      background-color: #ffffff;
+      border-radius: 4px;
+      border: 1px solid #27548A;
+    }
+    label {
+      display: block;
+      margin: 8px 0 4px;
+      color: #183B4E;
+      font-weight: bold;
+      font-size: 0.95em;
+    }
+    input[type="text"],
+    input[type="number"],
+    select {
+      padding: 9px;
+      border: 1px solid #27548A;
+      border-radius: 4px;
+      font-size: 0.95em;
+      width: 100%;
+      color: #183B4E;
+      background-color: #fff;
+    }
+    input[type="text"]::placeholder {
+      color: #aaa;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px 25px;
+    }
+    /* Grid specific for goalkeeper main stats */
+    .gk-stats-grid {
+        display: grid;
+        /* Aim for 2-3 columns for these 5 stats */
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px 20px;
+    }
+    .form-column {
+      display: flex;
+      flex-direction: column;
+      gap: 0px;
+    }
+    .form-column label {
+        margin-top: 10px;
+        margin-bottom: 2px;
+    }
+
+    /* --- Button Styles --- */
+    button { /* General button styling */
+      padding: 10px 15px;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease, opacity 0.3s ease;
+      margin: 10px 5px; /* Consistent margin */
+    }
+
+    button[type="button"]#calculateButton { /* Specific ID for calculate button */
+        background-color: #27548A;
+        display: block; /* Keep centered */
+        width: 250px; /* Maintain width */
+        margin: 10px auto 0 auto; /* Keep centered */
+        font-size: 1.1em; /* Maintain font size */
+        padding: 12px; /* Maintain padding */
+    }
+    button[type="button"]#calculateButton:hover {
+        background-color: #183B4E;
+    }
+
+    button#compareButton {
+        background-color: #5cb85c; /* Green */
+        display: block; /* Center */
+        margin: 15px auto 5px auto; /* Spacing */
+        width: 300px; /* Slightly wider for new text */
+    }
+    button#compareButton:hover:not(:disabled) {
+        background-color: #4cae4c; /* Darker green */
+    }
+    button#compareButton:disabled {
+        background-color: #cccccc; /* Grey out when disabled */
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+
+    .result {
+      margin-top: 25px;
+      text-align: center;
+      font-size: 1.3em;
+      font-weight: normal;
+      color: #183B4E;
+      min-height: 2em;
+      padding: 10px;
+      background-color: #eef4fa;
+      border: 1px solid #27548A;
+      border-radius: 6px;
+    }
+    .result strong {
+        color: #27548A;
+        font-weight: bold;
+    }
+    .result .rating-value {
+        font-weight: bold;
+        color: #DDA853;
+        font-size: 1.2em;
+        margin-left: 8px;
+    }
+
+    .info {
+      margin-top: 15px;
+      font-size: 0.9em;
+      text-align: center;
+      color: #183B4E;
+    }
+
+    /* --- History & Comparison Styles --- */
+    #historyContainer {
+        margin-top: 25px;
+    }
+    #historyContainer h3 {
+        text-align: center;
+        color: #27548A;
+        margin-bottom: 10px;
+        font-size: 1.2em;
+    }
+    #historyList {
+      padding-left: 0;
+      list-style: none;
+      font-size: 0.95em;
+      color: #183B4E;
+      max-height: 200px; /* Slightly more height */
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #f8f8f8;
+    }
+    #historyList li {
+        margin-bottom: 8px;
+        padding: 8px 10px;
+        border-bottom: 1px dashed #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px; /* Add gap between elements */
+    }
+     #historyList li:last-child {
+        border-bottom: none;
+    }
+    #historyList li .player-info { /* Span to group text */
+        flex-grow: 1; /* Allow text to take available space */
+        display: flex;
+        align-items: center;
+        gap: 8px; /* Space between elements inside info */
+    }
+    #historyList li .player-info .player-price { /* Style for price */
+        font-size: 0.9em;
+        color: #555;
+    }
+    #historyList li input[type="checkbox"] {
+        margin-right: 8px; /* Space before text */
+        cursor: pointer;
+    }
+    #historyList li strong { /* Rating */
+        color: #DDA853;
+        font-weight: bold;
+        margin-left: 5px;
+    }
+    .delete-history {
+        padding: 3px 8px;
+        font-size: 0.85em;
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-left: 10px;
+        transition: background-color 0.2s ease;
+        flex-shrink: 0; /* Prevent button from shrinking */
+    }
+    .delete-history:hover {
+        background-color: #c0392b;
+    }
+
+    /* Comparison Result Area */
+    #comparisonResult {
+        margin-top: 15px;
+        padding: 12px;
+        background-color: #fdfae1; /* Light yellow background */
+        border: 1px solid #DDA853; /* Highlight border */
+        border-radius: 6px;
+        text-align: center;
+        font-size: 1.05em;
+        color: #183B4E;
+        min-height: 2.5em; /* Ensure space */
+        line-height: 1.4;
+    }
+     #comparisonResult strong { /* Rating values inside message */
+         color: #DDA853;
+         font-weight: bold;
+     }
+      #comparisonResult .player-name { /* Player names inside message */
+         font-weight: bold;
+         color: #27548A;
+     }
+      /* Added back rentability tag styles */
+      #comparisonResult .rentability-tag {
+          font-weight: bold;
+          padding: 2px 5px;
+          border-radius: 3px;
+          color: white;
+          margin: 0 3px; /* Add small margin */
+      }
+      #comparisonResult .rentable { background-color: #5cb85c; } /* Green */
+      #comparisonResult .less-rentable { background-color: #f0ad4e; } /* Orange */
+      #comparisonResult .not-rentable { background-color: #d9534f; } /* Red (Not used currently, but available)*/
+
+
+    @media (max-width: 900px) {
+        .form-grid, .gk-stats-grid { /* Apply to both grids */
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+    }
+    @media (max-width: 600px) {
+      .form-grid, .gk-stats-grid { /* Apply to both grids */
+        grid-template-columns: 1fr;
+      }
+      button[type="button"]#calculateButton,
+      button#compareButton {
+        width: 100%;
+      }
+      .container {
+        width: 95%;
+        padding: 15px 20px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+      .result, #comparisonResult {
+          font-size: 1.1em;
+      }
+      .result .rating-value {
+          font-size: 1.1em;
+      }
+      #historyList li {
+          flex-wrap: wrap;
+      }
+       #historyList li .player-info {
+          width: 100%;
+          margin-bottom: 5px;
+          justify-content: flex-start;
+       }
+       .delete-history {
+           margin-left: auto;
+       }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Moneyball - EAFC</h1>
+    <div class="max-rating">Máxima valoración posible por estadística: <strong>99</strong></div>
+    <p><b>Introduce las estadísticas del jugador (puedes usar rangos, ej.: 0-99) para calcular su rating global sin límite superior.</b></p>
+
+    <form id="playerForm">
+       <fieldset>
+        <legend>Datos Generales</legend>
+        <div class="form-grid">
+            <div> <label for="nombre">Nombre:</label> <input type="text" id="nombre" placeholder="Nombre del jugador"> </div>
+            <div> <label for="position">Posición:</label> <select id="position"> <option value="DC">DC (Delantero Centro)</option> <option value="EI_ED">EI/ED (Extremo Izq/Der)</option> <option value="MCO">MCO (Mediapunta Ofensivo)</option> <option value="MC">MC (Interior / Box-to-Box)</option> <option value="MCD">MCD (Pivote Defensivo)</option> <option value="DFC">DFC (Defensa Central)</option> <option value="LI_LD">LI/LD (Lateral Izq/Der)</option> <option value="CAI_CAD">CAI/CAD (Carrilero Izq/Der)</option> <option value="portero">POR (Portero)</option> </select> </div>
+            <div> <label for="edad">Edad:</label> <input type="number" id="edad" min="16" max="50" value="25"> </div>
+            <div> <label for="precio">Precio (en millones):</label> <input type="number" id="precio" step="0.1" placeholder="Ej: 10.5"> </div>
+        </div>
+      </fieldset>
+      <div id="nonGoalkeeperStats">
+        <fieldset>
+            <legend>Estadísticas del Jugador</legend>
+            <div class="form-grid">
+                <div class="form-column">
+                    <label for="aceleracion">Aceleración:</label> <input type="text" id="aceleracion" placeholder="0-99">
+                    <label for="velocidad">Velocidad:</label> <input type="text" id="velocidad" placeholder="0-99">
+                    <label for="agilidad">Agilidad:</label> <input type="text" id="agilidad" placeholder="0-99">
+                    <label for="equilibrio">Equilibrio:</label> <input type="text" id="equilibrio" placeholder="0-99">
+                    <label for="salto">Salto:</label> <input type="text" id="salto" placeholder="0-99">
+                    <label for="resistencia">Resistencia:</label> <input type="text" id="resistencia" placeholder="0-99">
+                    <label for="fuerza">Fuerza:</label> <input type="text" id="fuerza" placeholder="0-99">
+                </div>
+                <div class="form-column">
+                    <label for="anticipacion">Anticipación:</label> <input type="text" id="anticipacion" placeholder="0-99">
+                    <label for="agresividad">Agresividad:</label> <input type="text" id="agresividad" placeholder="0-99">
+                    <label for="compostura">Compostura:</label> <input type="text" id="compostura" placeholder="0-99">
+                    <label for="intercepciones">Intercep.:</label> <input type="text" id="intercepciones" placeholder="0-99">
+                    <label for="posicionamiento">Pos. ataque:</label> <input type="text" id="posicionamiento" placeholder="0-99">
+                    <label for="vision">Visión:</label> <input type="text" id="vision" placeholder="0-99">
+                </div>
+                <div class="form-column">
+                    <label for="controlBalon">Contr. balón:</label> <input type="text" id="controlBalon" placeholder="0-99">
+                    <label for="centros">Centros:</label> <input type="text" id="centros" placeholder="0-99">
+                    <label for="regates">Regates:</label> <input type="text" id="regates" placeholder="0-99">
+                    <label for="finalizacion">Finalización:</label> <input type="text" id="finalizacion" placeholder="0-99">
+                    <label for="tirosLibres">Prec. falta:</label> <input type="text" id="tirosLibres" placeholder="0-99">
+                    <label for="cabeceo">Prec. cabeza:</label> <input type="text" id="cabeceo" placeholder="0-99">
+                    <label for="pasesLargos">Pase largo:</label> <input type="text" id="pasesLargos" placeholder="0-99">
+                    <label for="pasesCortos">Pase corto:</label> <input type="text" id="pasesCortos" placeholder="0-99">
+                </div>
+                <div class="form-column">
+                    <label for="capDefensiva">Cap. defens.:</label> <input type="text" id="capDefensiva" placeholder="0-99">
+                    <label for="potenciaTiro">Pot. de tiro:</label> <input type="text" id="potenciaTiro" placeholder="0-99">
+                    <label for="tirosLejanos">Tiro lejano:</label> <input type="text" id="tirosLejanos" placeholder="0-99">
+                    <label for="entradasPie">Robos:</label> <input type="text" id="entradasPie" placeholder="0-99">
+                    <label for="entradasAgresivas">Entradas:</label> <input type="text" id="entradasAgresivas" placeholder="0-99">
+                    <label for="voleas">Voleas:</label> <input type="text" id="voleas" placeholder="0-99">
+                    <label for="efecto">Efecto:</label> <input type="text" id="efecto" placeholder="0-99">
+                    <label for="penaltis">Penaltis:</label> <input type="text" id="penaltis" placeholder="0-99">
+                </div>
+            </div>
+        </fieldset>
+      </div>
+      <div id="goalkeeperStats" style="display: none;">
+         <fieldset>
+             <legend>Estadísticas de Portero</legend>
+             <div class="gk-stats-grid">
+                 <div><label for="estirada">Estirada:</label> <input type="text" id="estirada" placeholder="0-99"></div>
+                 <div><label for="paradas">Paradas:</label> <input type="text" id="paradas" placeholder="0-99"></div>
+                 <div><label for="saques">Saques:</label> <input type="text" id="saques" placeholder="0-99"></div>
+                 <div><label for="reflejos">Reflejos:</label> <input type="text" id="reflejos" placeholder="0-99"></div>
+                 <div><label for="colocacion">Colocación:</label> <input type="text" id="colocacion" placeholder="0-99"></div>
+             </div>
+         </fieldset>
+         <fieldset style="margin-top: 15px;">
+             <legend>Datos Físicos (Portero)</legend>
+             <div> <label for="altura">Altura (cm):</label> <input type="number" id="altura" min="160" max="215" value="185"></div>
+         </fieldset>
+      </div>
+
+      <button type="button" id="calculateButton" onclick="handleRating()">Calcular Rating</button>
+    </form>
+     <div id="historyContainer">
+          <h3>Historial de Cálculos</h3>
+          <ul id="historyList"></ul>
+          <button type="button" id="compareButton" onclick="findMostRentable()" disabled>Encontrar Más Rentable (Selecciona 2+)</button>
+          <div id="comparisonResult">Selecciona dos o más jugadores del historial para encontrar al más rentable.</div>
+      </div>
+
+    <div class="result" id="resultado">Introduce los datos del jugador y pulsa "Calcular Rating".</div>
+    <div class="info">
+      Nota: Para cada estadística, si introduces un rango (ej.: 70-85), se tomará el promedio. Si dejas un campo vacío, se considerará 0.
+    </div>
+  </div>
+
+  <script>
+    // parseStatValue, toggleGoalkeeperStats (no changes)
+    function parseStatValue(inputValue) { inputValue = String(inputValue).trim(); if (!inputValue) { return 0; } if (inputValue === '1') return 1; if (inputValue.includes("-")) { let parts = inputValue.split("-"); if (parts.length === 2) { let a = parseFloat(parts[0].trim()); let b = parseFloat(parts[1].trim()); if (!isNaN(a) && !isNaN(b) && a >= 1 && a <= 99 && b >= 1 && b <= 99 && a <= b) { return (a + b) / 2; } else { return 0; } } } let num = parseFloat(inputValue); return (!isNaN(num) && num >= 1 && num <= 99) ? num : 0; }
+    document.getElementById('position').addEventListener('change', function() { const pos = this.value; if (pos === "portero") { document.getElementById('goalkeeperStats').style.display = "block"; document.getElementById('nonGoalkeeperStats').style.display = "none"; } else { document.getElementById('goalkeeperStats').style.display = "none"; document.getElementById('nonGoalkeeperStats').style.display = "block"; } });
+
+    // --- History Management (No Changes) ---
+    let history = [];
+    const historyListElement = document.getElementById('historyList');
+    const compareButton = document.getElementById('compareButton');
+    const comparisonResultElement = document.getElementById('comparisonResult');
+
+     function renderHistory() {
+        historyListElement.innerHTML = '';
+        history.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span class="player-info">
+                  <input type="checkbox" class="history-checkbox" data-id="${item.id}">
+                  <span>${item.name}: <strong>${item.ratingDecimal.toFixed(3)}</strong></span>
+                  <span class="player-price">(Precio: ${item.price}M)</span>
+                </span>
+                <button class="delete-history" data-id="${item.id}">Borrar</button>
+            `;
+            historyListElement.appendChild(li);
+        });
+        updateCompareButtonState();
+        comparisonResultElement.innerHTML = 'Selecciona dos o más jugadores del historial para encontrar al más rentable.';
+        comparisonResultElement.className = 'comparisonResult';
+    }
+     historyListElement.addEventListener('click', function(event) {
+        if (event.target.classList.contains('delete-history')) {
+            const historyIdToDelete = event.target.dataset.id;
+            history = history.filter(item => String(item.id) !== historyIdToDelete);
+            renderHistory();
+        }
+    });
+
+    // --- Rating Calculation (MODIFIED FOR GOALKEEPER) ---
+     function calcularRating() {
+        const position = document.getElementById('position').value;
+        const edad = parseFloat(document.getElementById('edad').value) || 25;
+        const precio = parseFloat(document.getElementById('precio').value) || 0;
+        let ratingFinal = 0;
+        let ratingBase = 0;
+        let calculatedRating = 0;
+
+        // --- GOALKEEPER CALCULATION UPDATED ---
+        if (position === "portero") {
+            // Read only the required stats
+            const estirada = parseStatValue(document.getElementById('estirada').value);
+            const paradas = parseStatValue(document.getElementById('paradas').value);
+            const saques = parseStatValue(document.getElementById('saques').value);
+            const reflejos = parseStatValue(document.getElementById('reflejos').value);
+            const colocacion = parseStatValue(document.getElementById('colocacion').value);
+            // Removed reading: velocidad_gk, aceleracion_gk, reacciones_gk, compostura_gk
+
+            // Calculate ratingBase with adjusted weights
+            ratingBase = (
+                estirada * 0.24 +    // Increased from 0.20
+                reflejos * 0.24 +    // Increased from 0.20
+                paradas * 0.21 +     // Increased from 0.18
+                colocacion * 0.21 +  // Increased from 0.18
+                saques * 0.08        // Increased from 0.06
+            );
+            // Removed terms for: reacciones_gk, velocidad_gk, aceleracion_gk, compostura_gk
+
+            // Height adjustment remains the same
+            const altura = parseFloat(document.getElementById('altura').value) || 185;
+            const alturaMin = 175, alturaMax = 205;
+            const ajusteAlturaMax = 3, ajusteAlturaMin = -2;
+            let ajusteAltura = 0;
+            if (altura <= alturaMin) ajusteAltura = ajusteAlturaMin;
+            else if (altura >= alturaMax) ajusteAltura = ajusteAlturaMax;
+            else ajusteAltura = ajusteAlturaMin + ((altura - alturaMin) / (alturaMax - alturaMin)) * (ajusteAlturaMax - ajusteAlturaMin);
+
+            calculatedRating = ratingBase + ajusteAltura;
+        }
+        // --- OUTFIELD PLAYER CALCULATION (No Changes) ---
+        else {
+            const stats = { aceleracion: parseStatValue(document.getElementById('aceleracion').value), velocidad: parseStatValue(document.getElementById('velocidad').value), agilidad: parseStatValue(document.getElementById('agilidad').value), equilibrio: parseStatValue(document.getElementById('equilibrio').value), salto: parseStatValue(document.getElementById('salto').value), resistencia: parseStatValue(document.getElementById('resistencia').value), fuerza: parseStatValue(document.getElementById('fuerza').value), anticipacion: parseStatValue(document.getElementById('anticipacion').value), agresividad: parseStatValue(document.getElementById('agresividad').value), compostura: parseStatValue(document.getElementById('compostura').value), intercepciones: parseStatValue(document.getElementById('intercepciones').value), capDefensiva: parseStatValue(document.getElementById('capDefensiva').value), posicionamiento: parseStatValue(document.getElementById('posicionamiento').value), vision: parseStatValue(document.getElementById('vision').value), penaltis: parseStatValue(document.getElementById('penaltis').value), controlBalon: parseStatValue(document.getElementById('controlBalon').value), centros: parseStatValue(document.getElementById('centros').value), regates: parseStatValue(document.getElementById('regates').value), finalizacion: parseStatValue(document.getElementById('finalizacion').value), tirosLibres: parseStatValue(document.getElementById('tirosLibres').value), cabeceo: parseStatValue(document.getElementById('cabeceo').value), pasesLargos: parseStatValue(document.getElementById('pasesLargos').value), pasesCortos: parseStatValue(document.getElementById('pasesCortos').value), efecto: parseStatValue(document.getElementById('efecto').value), potenciaTiro: parseStatValue(document.getElementById('potenciaTiro').value), tirosLejanos: parseStatValue(document.getElementById('tirosLejanos').value), entradasPie: parseStatValue(document.getElementById('entradasPie').value), entradasAgresivas: parseStatValue(document.getElementById('entradasAgresivas').value), voleas: parseStatValue(document.getElementById('voleas').value) };
+            let pesos = {};
+            if (position === 'DC') { pesos = { finalizacion: 0.11, posicionamiento: 0.11, aceleracion: 0.09, velocidad: 0.09, controlBalon: 0.09, compostura: 0.09, regates: 0.085, fuerza: 0.085, potenciaTiro: 0.085, agilidad: 0.08, cabeceo: 0.08, penaltis: 0.075, equilibrio: 0.07, voleas: 0.07, tirosLejanos: 0.065, pasesCortos: 0.06, salto: 0.06, resistencia: 0.06, efecto: 0.06, vision: 0.05, agresividad: 0.05, tirosLibres: 0.05, anticipacion: 0.05, pasesLargos: 0.04, centros: 0.03, intercepciones: 0.02, capDefensiva: 0.015, entradasPie: 0.015, entradasAgresivas: 0.01 }; }
+            else if (position === 'EI_ED') { pesos = { aceleracion: 0.115, velocidad: 0.115, regates: 0.105, controlBalon: 0.105, agilidad: 0.10, posicionamiento: 0.095, centros: 0.095, equilibrio: 0.09, compostura: 0.09, finalizacion: 0.09, pasesCortos: 0.085, efecto: 0.09, vision: 0.08, resistencia: 0.08, potenciaTiro: 0.075, tirosLejanos: 0.075, penaltis: 0.07, pasesLargos: 0.065, tirosLibres: 0.065, anticipacion: 0.06, fuerza: 0.06, voleas: 0.06, agresividad: 0.055, cabeceo: 0.05, salto: 0.05, intercepciones: 0.03, entradasPie: 0.03, capDefensiva: 0.025, entradasAgresivas: 0.025 }; }
+            else if (position === 'MCO') { pesos = { controlBalon: 0.11, vision: 0.11, pasesCortos: 0.11, regates: 0.105, agilidad: 0.10, posicionamiento: 0.095, pasesLargos: 0.095, equilibrio: 0.09, compostura: 0.09, efecto: 0.09, aceleracion: 0.085, velocidad: 0.08, tirosLejanos: 0.085, finalizacion: 0.08, potenciaTiro: 0.08, tirosLibres: 0.075, centros: 0.07, penaltis: 0.07, anticipacion: 0.07, resistencia: 0.065, voleas: 0.065, fuerza: 0.06, cabeceo: 0.055, agresividad: 0.05, salto: 0.05, intercepciones: 0.04, entradasPie: 0.03, capDefensiva: 0.03, entradasAgresivas: 0.025 }; }
+            else if (position === 'MC') { pesos = { pasesCortos: 0.105, vision: 0.10, pasesLargos: 0.10, controlBalon: 0.095, compostura: 0.095, resistencia: 0.08, regates: 0.08, agilidad: 0.08, equilibrio: 0.08, intercepciones: 0.08, posicionamiento: 0.07, aceleracion: 0.07, velocidad: 0.07, fuerza: 0.07, agresividad: 0.07, entradasPie: 0.07, tirosLejanos: 0.07, efecto: 0.07, anticipacion: 0.07, capDefensiva: 0.065, entradasAgresivas: 0.06, potenciaTiro: 0.06, tirosLibres: 0.06, penaltis: 0.06, salto: 0.055, finalizacion: 0.05, cabeceo: 0.05, voleas: 0.05 }; }
+            else if (position === 'MCD') { pesos = { intercepciones: 0.11, entradasPie: 0.11, capDefensiva: 0.10, entradasAgresivas: 0.10, pasesCortos: 0.095, fuerza: 0.095, agresividad: 0.09, compostura: 0.09, pasesLargos: 0.085, resistencia: 0.085, anticipacion: 0.08, vision: 0.075, controlBalon: 0.075, salto: 0.07, equilibrio: 0.07, aceleracion: 0.065, velocidad: 0.065, agilidad: 0.065, cabeceo: 0.065, regates: 0.06, posicionamiento: 0.05, tirosLejanos: 0.05, centros: 0.04, potenciaTiro: 0.04, efecto: 0.04, tirosLibres: 0.04, penaltis: 0.04, finalizacion: 0.025, voleas: 0.025 }; }
+            else if (position === 'DFC') { pesos = { capDefensiva: 0.11, entradasPie: 0.11, intercepciones: 0.105, entradasAgresivas: 0.105, fuerza: 0.10, cabeceo: 0.095, salto: 0.09, compostura: 0.09, agresividad: 0.08, anticipacion: 0.08, resistencia: 0.07, pasesCortos: 0.07, aceleracion: 0.065, velocidad: 0.065, pasesLargos: 0.06, controlBalon: 0.05, equilibrio: 0.05, agilidad: 0.04, vision: 0.04, regates: 0.03, penaltis: 0.03, posicionamiento: 0.02, centros: 0.02, potenciaTiro: 0.02, efecto: 0.02, tirosLibres: 0.02, tirosLejanos: 0.015, finalizacion: 0.01, voleas: 0.01 }; }
+            else if (position === 'LI_LD') { pesos = { aceleracion: 0.105, velocidad: 0.105, entradasPie: 0.10, resistencia: 0.095, intercepciones: 0.095, entradasAgresivas: 0.09, centros: 0.09, capDefensiva: 0.09, compostura: 0.085, controlBalon: 0.08, agilidad: 0.08, pasesCortos: 0.08, regates: 0.075, equilibrio: 0.075, agresividad: 0.075, anticipacion: 0.07, pasesLargos: 0.07, salto: 0.07, fuerza: 0.07, vision: 0.065, cabeceo: 0.06, efecto: 0.06, posicionamiento: 0.055, tirosLibres: 0.05, penaltis: 0.045, potenciaTiro: 0.04, tirosLejanos: 0.035, finalizacion: 0.02, voleas: 0.02 }; }
+            else if (position === 'CAI_CAD') { pesos = { aceleracion: 0.11, velocidad: 0.11, centros: 0.105, resistencia: 0.10, regates: 0.095, controlBalon: 0.095, agilidad: 0.09, entradasPie: 0.09, pasesCortos: 0.085, compostura: 0.085, equilibrio: 0.08, intercepciones: 0.08, entradasAgresivas: 0.08, pasesLargos: 0.075, agresividad: 0.075, anticipacion: 0.07, capDefensiva: 0.07, vision: 0.07, salto: 0.07, fuerza: 0.07, efecto: 0.07, posicionamiento: 0.065, cabeceo: 0.06, tirosLibres: 0.055, penaltis: 0.05, potenciaTiro: 0.045, tirosLejanos: 0.04, finalizacion: 0.03, voleas: 0.025 }; }
+
+            ratingBase = 0;
+            for (let stat in pesos) { if (stats.hasOwnProperty(stat) && pesos.hasOwnProperty(stat)) { ratingBase += stats[stat] * pesos[stat]; } }
+            calculatedRating = ratingBase;
+        }
+
+        // --- COMMON ADJUSTMENTS (No Changes) ---
+        const precioMax = 200; const bonusMaxPrecio = 5; const penaltyMaxPrecio = 5; let ajustePrecio = 0; if (precio <= 0) ajustePrecio = bonusMaxPrecio; else if (precio >= precioMax) ajustePrecio = -penaltyMaxPrecio; else ajustePrecio = bonusMaxPrecio - (precio / precioMax) * (bonusMaxPrecio + penaltyMaxPrecio);
+        const edadMin = 16, edadMax = 40, edadPico = 27; const bonusMaxEdad = 5; const penaltyMaxEdad = 5; let ajusteEdad = 0; if (edad <= edadMin) ajusteEdad = bonusMaxEdad; else if (edad >= edadMax) ajusteEdad = -penaltyMaxEdad; else if (edad < edadPico) ajusteEdad = bonusMaxEdad - ((edad - edadMin) / (edadPico - edadMin)) * bonusMaxEdad; else ajusteEdad = 0 - ((edad - edadPico) / (edadMax - edadPico)) * penaltyMaxEdad;
+        calculatedRating = calculatedRating + ajustePrecio + ajusteEdad;
+        ratingFinal = Math.max(1, calculatedRating);
+        return { ratingDecimal: Math.round(ratingFinal * 1000) / 1000, price: precio };
+    }
+
+    // Display Rating (no changes)
+    function printRating(calculationResult) {
+        const ratingDecimal = calculationResult.ratingDecimal;
+        const priceUsed = calculationResult.price;
+        const nombre = document.getElementById('nombre').value.trim() || 'Jugador Desconocido';
+        const message = `Rating Calculado para <strong>${nombre}</strong>: <span class="rating-value">${ratingDecimal.toFixed(3)}</span>`;
+        document.getElementById('resultado').innerHTML = message;
+        if (nombre !== 'Jugador Desconocido') {
+            const newHistoryEntry = { id: Date.now(), name: nombre, ratingDecimal: ratingDecimal, price: priceUsed };
+            history.unshift(newHistoryEntry);
+            if (history.length > 10) { history.pop(); }
+            renderHistory();
+        }
+    }
+
+    // Handle Rating Calculation Trigger (no changes)
+    function handleRating() {
+        try {
+            const result = calcularRating();
+            printRating(result);
+        } catch (error) {
+            console.error("Error calculating rating:", error);
+            document.getElementById('resultado').innerHTML = "<strong>Error al calcular.</strong> Revisa los valores introducidos.";
+        }
+    }
+
+    // --- Rentability Comparison Logic (No Changes Needed Here) ---
+
+    // Listener for checkbox changes (no changes)
+    historyListElement.addEventListener('change', function(event) {
+        if (event.target.classList.contains('history-checkbox')) {
+            updateCompareButtonState();
+        }
+    });
+
+    // Update compare button state (no changes)
+    function updateCompareButtonState() {
+        const checkedBoxes = historyListElement.querySelectorAll('.history-checkbox:checked');
+        compareButton.disabled = (checkedBoxes.length < 2);
+        if (checkedBoxes.length < 2) {
+             comparisonResultElement.innerHTML = 'Selecciona dos o más jugadores para encontrar al más rentable.';
+             comparisonResultElement.className = 'comparisonResult';
+        }
+    }
+
+    // Helper function for pairwise rentability check (no changes)
+    function isPlayerAMoreRentable(playerA, playerB) {
+        const RATING_DIFF_THRESHOLD = 1.0;
+        const COST_PER_POINT_THRESHOLD = 5.0;
+        if (playerA.id === playerB.id) return false;
+        if (playerA.ratingDecimal === playerB.ratingDecimal && playerA.price === playerB.price) return false;
+        if (playerA.ratingDecimal >= playerB.ratingDecimal && playerA.price <= playerB.price) return true;
+        if (playerB.ratingDecimal >= playerA.ratingDecimal && playerB.price <= playerA.price) return false;
+        const ratingDiff = Math.abs(playerA.ratingDecimal - playerB.ratingDecimal);
+        const priceDiff = Math.abs(playerA.price - playerB.price);
+        if (ratingDiff < RATING_DIFF_THRESHOLD) return playerA.price < playerB.price;
+        let costPerPoint = 0;
+        if (ratingDiff > 0) costPerPoint = priceDiff / ratingDiff;
+        else return playerA.price < playerB.price;
+        if (playerA.ratingDecimal > playerB.ratingDecimal) return costPerPoint <= COST_PER_POINT_THRESHOLD;
+        else return costPerPoint > COST_PER_POINT_THRESHOLD;
+    }
+
+    // Helper function to generate detailed comparison message (no changes)
+    function generateDetailedComparisonMessage(winner, loser) {
+        const RATING_DIFF_THRESHOLD = 1.0;
+        const COST_PER_POINT_THRESHOLD = 5.0;
+        const winnerName = `<span class="player-name">${winner.name}</span>`;
+        const loserName = `<span class="player-name">${loser.name}</span>`;
+        let reason = "";
+        const ratingDiff = Math.abs(winner.ratingDecimal - loser.ratingDecimal);
+        const priceDiff = Math.abs(winner.price - loser.price);
+        if (winner.ratingDecimal >= loser.ratingDecimal && winner.price <= loser.price) {
+             if (winner.ratingDecimal === loser.ratingDecimal && winner.price === loser.price) {
+                 reason = `Ambos jugadores (${winnerName} y ${loserName}) tienen idéntico rating y precio.`;
+             } else {
+                reason = `${winnerName} es <span class="rentability-tag rentable">más rentable</span> (rating igual o superior a un precio igual o inferior que ${loserName}).`;
+             }
+        }
+        else {
+             if (ratingDiff < RATING_DIFF_THRESHOLD) {
+                  reason = `La diferencia de rating entre ${winnerName} y ${loserName} es marginal (${ratingDiff.toFixed(3)} puntos). ${winnerName} es <span class="rentability-tag less-rentable">probablemente más rentable</span> por su menor precio (${winner.price}M vs ${loser.price}M).`;
+             }
+             else {
+                 let costPerPoint = 0;
+                 if (ratingDiff > 0) costPerPoint = priceDiff / ratingDiff;
+                  if (winner.ratingDecimal > loser.ratingDecimal) {
+                      reason = `${winnerName} es <span class="rentability-tag rentable">más rentable</span>. Aunque ${priceDiff.toFixed(1)}M€ más caro que ${loserName}, la mejora de rating (${ratingDiff.toFixed(3)} puntos) se consigue a un coste por punto razonable (${costPerPoint > 0 ? costPerPoint.toFixed(2) + 'M€/punto' : 'N/A'}).`;
+                  } else {
+                      reason = `${winnerName} es <span class="rentability-tag less-rentable">probablemente más rentable</span>. Pagar ${priceDiff.toFixed(1)}M€ extra por ${loserName} (Rating: ${loser.ratingDecimal.toFixed(3)}) supondría un coste por punto de rating adicional (${costPerPoint > 0 ? costPerPoint.toFixed(2) + 'M€/punto' : 'N/A'}) elevado.`;
+                  }
+             }
+        }
+        return reason;
+    }
+
+
+    // Main function to find the most rentable among selected (no changes)
+    function findMostRentable() {
+        const checkedBoxes = historyListElement.querySelectorAll('.history-checkbox:checked');
+        const selectedIds = Array.from(checkedBoxes).map(cb => cb.dataset.id);
+        if (selectedIds.length < 2) {
+            comparisonResultElement.innerHTML = 'Error: Debes seleccionar al menos dos jugadores.';
+            comparisonResultElement.className = 'comparisonResult';
+            return;
+        }
+        const selectedPlayers = history.filter(item => selectedIds.includes(String(item.id)));
+        if (selectedPlayers.length < 2) {
+             comparisonResultElement.innerHTML = 'Error: No se encontraron suficientes jugadores seleccionados en el historial.';
+             comparisonResultElement.className = 'comparisonResult';
+             return;
+        }
+        let bestCandidate = selectedPlayers[0];
+        let previousBestCandidate = null;
+        for (let i = 1; i < selectedPlayers.length; i++) {
+            let currentPlayer = selectedPlayers[i];
+            if (isPlayerAMoreRentable(currentPlayer, bestCandidate)) {
+                previousBestCandidate = bestCandidate;
+                bestCandidate = currentPlayer;
+            }
+        }
+        let comparisonTarget = null;
+        if (bestCandidate === selectedPlayers[0] && selectedPlayers.length > 1) {
+             comparisonTarget = selectedPlayers[1];
+        } else if (previousBestCandidate) {
+             comparisonTarget = previousBestCandidate;
+        }
+        if (!comparisonTarget && selectedPlayers.length > 1) {
+            comparisonTarget = selectedPlayers.find(p => p.id !== bestCandidate.id);
+        }
+        let finalMessage = "";
+        if (comparisonTarget) {
+            finalMessage = generateDetailedComparisonMessage(bestCandidate, comparisonTarget);
+        } else {
+            const winnerName = `<span class="player-name">${bestCandidate.name}</span>`;
+            finalMessage = `De los seleccionados, ${winnerName} es el más rentable (Rating: ${bestCandidate.ratingDecimal.toFixed(3)}, Precio: ${bestCandidate.price}M). No se pudo realizar comparación detallada.`;
+        }
+        comparisonResultElement.innerHTML = `Resultado (${selectedPlayers.length} jugadores): ${finalMessage}`;
+        comparisonResultElement.className = 'comparisonResult';
+    }
+
+
+    // --- Initial Setup ---
+    document.getElementById('position').dispatchEvent(new Event('change'));
+    renderHistory();
+    updateCompareButtonState();
+
+  </script>
+</body>
+</html>
